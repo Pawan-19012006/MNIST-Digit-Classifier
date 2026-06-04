@@ -1,7 +1,5 @@
 # MNIST Digit Classifier using PyTorch
 
-A beginner-to-intermediate deep learning project built from first principles using PyTorch.
-
 This project implements a **Fully Connected Neural Network (Dense Neural Network)** to classify handwritten digits from the MNIST dataset.
 
 The goal of this project was not just to make the model work, but to deeply understand:
