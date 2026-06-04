@@ -12,10 +12,23 @@ train_dataset = datasets.MNIST(
     transform = transforms.ToTensor() #raw mnist images are in the format of PIL, need to convert to Tensors
 )
 
+test_dataset = datasets.MNIST(
+    root = "data",
+    train = False,
+    download=True,
+    transform = transforms.ToTensor()
+)
+
 train_loader = DataLoader(
     dataset=train_dataset,
     batch_size=32, #Batching of 32 images together
     shuffle=True #the order of the images will shuffle, else the labels will be stagnant and it creates learning bias
+)
+
+test_loader = DataLoader(
+    dataset=test_dataset,
+    batch_size = 32,
+    shuffle=False
 )
 
 class MNISTModel(nn.Module):
@@ -52,12 +65,14 @@ for epoch in range(5):
    # print(f"Epoch {epoch+1}, Loss: {epoch_loss}")
 
 model.eval() #This will state that the model is in inference/evaluation mode
-
-image,label = train_dataset[0]
-image = image.view(1,784)
+correct = 0
+total = 0
 with torch.no_grad():
-    outputs = model(image)
-    prediction = torch.argmax(outputs, dim=1)
-print(f"Predicted:{prediction.item()}")
-print(f"Actual: {label}")
-          
+    for images, labels in test_loader:
+        images = images.view(images.shape[0],-1)
+        outputs = model(images)
+        predictions = torch.argmax(outputs,dim=1)
+        correct += (predictions==labels).sum().item()
+        total+=labels.size(0)
+accuracy = 100 * correct/total
+print(f"Accuracy:{accuracy:.2f}%")
