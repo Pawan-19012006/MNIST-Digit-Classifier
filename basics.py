@@ -6,7 +6,7 @@ w = torch.tensor(3.0,requires_grad=True) #weights
 b = torch.tensor(1.0,requires_grad=True) #bias
 print("Initial Weight: ",w)
 print("Initial Bias: ",b)
-y_pred = w * x + b
+y_pred = w * x + b #Forward Pass
 loss = (y_pred - y_true)**2
 print("Prediction:", y_pred)
 print("Loss", loss)
@@ -16,6 +16,7 @@ loss.backward()
 print("Gradient of w:",w.grad)
 print("Gradient of b:",b.grad)
 
+#Optimization Starts
 learning_rate = 0.01
 with torch.no_grad():
     w = w - learning_rate * w.grad #W(new) = W(old) - LearningRate * w.grad
