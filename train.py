@@ -1,3 +1,4 @@
+## IMPORTS
 import torch
 from torchvision import datasets
 from torchvision import transforms
@@ -5,6 +6,7 @@ from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 import torch.nn as nn
 
+## Dataset Creation
 train_dataset = datasets.MNIST(
     root = "data",
     train = True, #splits into train and test
@@ -19,6 +21,7 @@ test_dataset = datasets.MNIST(
     transform = transforms.ToTensor()
 )
 
+# DataLoaders Creation
 train_loader = DataLoader( #We are splitting the train data into batches each containing 32 images
     dataset=train_dataset,
     batch_size=32, #Batching of 32 images together
@@ -31,6 +34,7 @@ test_loader = DataLoader(
     shuffle=False
 )
 
+## Blueprint of the model
 class MNISTModel(nn.Module):
     def __init__(self):
         super().__init__() #input layer layer only passes the features, there will be no activation taking place in there, also initially the number of neurons will be equal to the number of features in the input layer, but after that it will keep reducing
@@ -43,7 +47,8 @@ class MNISTModel(nn.Module):
         x = self.relu(x)
         x = self.layer2(x)
         return x
-    
+
+## Object Creation
 model = MNISTModel() #We use the mnistmodel which is the class we created above
 criterion = nn.CrossEntropyLoss() #it is the one used for the loss function finding
 optimizer = torch.optim.SGD( #We use the Stochastic Gradient Descent Optimizer in here
@@ -51,6 +56,10 @@ optimizer = torch.optim.SGD( #We use the Stochastic Gradient Descent Optimizer i
     lr=0.01 #Learning rate is constant and stable throughout the optimization in case of SGD
 )
 
+train_losses = []
+test_accuracies = []
+
+## Training Loop Begins
 for epoch in range(5): #One epoch will contain all the forward pass, backward pass and optimization of the whole train dataset, example if there are 60000 images in dataset, we split it into 32 batches, so there will be 1875 batches alltogether, so one epoch will contain 1875 forward pass, 1875 backprop and 1875 optimizer updates
     running_loss=0 #initiating the running loss variable
     for images,labels in train_loader: #we fetch the images and labels from the train loader(train loader sends each batch data)
@@ -62,17 +71,28 @@ for epoch in range(5): #One epoch will contain all the forward pass, backward pa
         optimizer.step() #.step is the one that actually updates the parameters, here is where new weights and biases are found using the formula and then are updated
         running_loss = running_loss + loss.item() #Running loss adds the loss from each batch(loss.item gives the loss number from each batch)
     epoch_loss = running_loss/len(train_loader) #gives the average loss for the whole epoch once the for loop gets executed, here we get runningloss/1875 since there are 1875 batches in the trainloader
-   # print(f"Epoch {epoch+1}, Loss: {epoch_loss}")
+    train_losses.append(epoch_loss)
 
-model.eval() #This will state that the model is in evaluation mode, has to be specified before the testing and evaluation
-correct = 0
-total = 0
-with torch.no_grad():#it states not to track and keep history of gradients
-    for images, labels in test_loader:
-        images = images.view(images.shape[0],-1) #flattening
-        outputs = model(images) #predicting
-        predictions = torch.argmax(outputs,dim=1) #when there are 32 images, each image will get an output value, we take the highest value out of it 
-        correct += (predictions==labels).sum().item()
-        total+=labels.size(0)
-accuracy = 100 * correct/total
-print(f"Accuracy:{accuracy:.2f}%")
+
+    model.eval() #This will state that the model is in evaluation mode, has to be specified before the testing and evaluation
+    correct = 0
+    total = 0
+    with torch.no_grad():#it states not to track and keep history of gradients
+        for images, labels in test_loader:
+            images = images.view(images.shape[0],-1) #flattening
+            outputs = model(images) #predicting
+            predictions = torch.argmax(outputs,dim=1) #when there are 32 images, each image will get an output value, we take the highest value out of it 
+            correct += (predictions==labels).sum().item()
+            total+=labels.size(0)
+    accuracy = 100 * correct/total
+    test_accuracies.append(accuracy)
+    print(f"Accuracy:{accuracy:.2f}%")
+    model.train() #This will change the state of the model back to training mode from eval mode
+
+## Loss Curve
+plt.plot(train_losses)
+plt.xlabel("Epoch")
+plt.ylabel("Loss")
+plt.title("Training Loss Curve")
+plt.show()
+
