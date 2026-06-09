@@ -96,3 +96,10 @@ plt.ylabel("Loss")
 plt.title("Training Loss Curve")
 plt.show()
 
+#Accuracy Curve
+plt.plot(test_accuracies)
+plt.xlabel("Epoch")
+plt.ylabel("Accuracy")
+plt.title("Test Accuracy Curve")
+plt.show()
+
