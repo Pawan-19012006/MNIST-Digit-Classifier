@@ -42,11 +42,13 @@ class MNISTModel(nn.Module):
         super().__init__() #input layer layer only passes the features, there will be no activation taking place in there, also initially the number of neurons will be equal to the number of features in the input layer, but after that it will keep reducing
         self.layer1 = nn.Linear(784,128) #Layer 1 is the first hidden layer, it has 784 input features and 128 Neurons
         self.relu = nn.ReLU() #it is the activation function that activates the neurons and also introduces a nonlinearity
+        self.dropout = nn.Dropout(0.5) #Dropouts are used for regularization, ie, it will wantedly turn off some activated neurons so that the neurons dont get overly trained and prevents overfitting
         self.layer2 = nn.Linear(128,10)#Layer 2 is the output layer, that only posesses 10 neurons, becoz each neuron represents a digit
 
     def forward(self,x): #forward function is responsible for the pathway/flow of the layers, what layer to be passed after another will be defined in here
         x = self.layer1(x)
         x = self.relu(x)
+        x = self.dropout(x) #We use dropout after relu becoz, relu activates certain neurons in the hidden layer and then the dropout will turn off 50 percent (since it is 0.50) of the neurons randomly
         x = self.layer2(x)
         return x
 
