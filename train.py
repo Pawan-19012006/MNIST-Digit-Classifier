@@ -5,6 +5,8 @@ from torchvision import transforms
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 import torch.nn as nn
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
 
 ## Dataset Creation
 train_dataset = datasets.MNIST(
@@ -73,7 +75,9 @@ for epoch in range(5): #One epoch will contain all the forward pass, backward pa
     epoch_loss = running_loss/len(train_loader) #gives the average loss for the whole epoch once the for loop gets executed, here we get runningloss/1875 since there are 1875 batches in the trainloader
     train_losses.append(epoch_loss)
 
-
+    ## Evaluation Loop
+    all_predictions = []
+    all_labels = []
     model.eval() #This will state that the model is in evaluation mode, has to be specified before the testing and evaluation
     correct = 0
     total = 0
@@ -82,6 +86,8 @@ for epoch in range(5): #One epoch will contain all the forward pass, backward pa
             images = images.view(images.shape[0],-1) #flattening
             outputs = model(images) #predicting
             predictions = torch.argmax(outputs,dim=1) #when there are 32 images, each image will get an output value, we take the highest value out of it 
+            all_predictions.extend(predictions.tolist())
+            all_labels.extend(labels.tolist()) #Confusion matrix requires all the predictions across the dataset hence we store them like this
             correct += (predictions==labels).sum().item()
             total+=labels.size(0)
     accuracy = 100 * correct/total
@@ -103,3 +109,17 @@ plt.ylabel("Accuracy")
 plt.title("Test Accuracy Curve")
 plt.show()
 
+#Confusion Matrix
+cm = confusion_matrix(all_labels,all_predictions)
+plt.figure(figsize=(10,8))
+sns.heatmap(
+    cm,
+    annot=True,
+    fmt="d",
+    cmap="Blues"
+)
+
+plt.xlabel("Predicted Label")
+plt.ylabel("True Label")
+plt.title("Confusion Matrix")
+plt.show()
